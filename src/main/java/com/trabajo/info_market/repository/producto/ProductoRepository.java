@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,4 +53,14 @@ public interface ProductoRepository extends JpaRepository<Producto, UUID> {
     WHERE c.nombre = :nombreCategoria
     """, nativeQuery = true)
     List<Producto> obtenerTodosLosProductosConNombreCategoriaNative(@Param("nombreCategoria") String nombreCategoria);
+
+    @Query(value = """
+            SELECT DISTINCT p.* FROM producto p
+            JOIN item_carrito i ON i.producto_id = p.id
+            JOIN carrito c ON i.carrito_id = c.id
+            WHERE p.stock = 0
+            AND c.estado = 'ABIERTO'
+            AND p.fecha_de_creacion >= :fechaCreacion
+            """, nativeQuery = true)
+    List<Producto> findProductosSinStockEnCarritosAbiertos(@Param("fechaCreacion") LocalDateTime fechaCreacion);
 }
