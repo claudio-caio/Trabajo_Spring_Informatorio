@@ -4,6 +4,9 @@ import com.trabajo.info_market.dto.error.ErrorResponseDto;
 import com.trabajo.info_market.dto.producto.ProductoCreateDto;
 import com.trabajo.info_market.dto.producto.ProductoDto;
 import com.trabajo.info_market.service.producto.ProductoService;
+import com.trabajo.info_market.service.producto.ProductoStockService;
+import com.trabajo.info_market.dto.producto.ProductoStockCeroDTO;
+import org.springframework.format.annotation.DateTimeFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Tag(
         name = "Productos REST APIs",
@@ -32,8 +37,18 @@ public class  ProductoController {
     @Autowired //Anotacion a nivel de atributo
     private ProductoService productoService;
 
-    public ProductoController(ProductoService productoService) {
+    @Autowired
+    private ProductoStockService productoStockService;
+
+    public ProductoController(ProductoService productoService, ProductoStockService productoStockService) {
         this.productoService = productoService;
+        this.productoStockService = productoStockService;
+    }
+    @GetMapping("/sin-stock-en-carritos")
+    public ResponseEntity<List<ProductoStockCeroDTO>> getProductosSinStockEnCarritosAbiertos(
+            @RequestParam(required = false) BigDecimal precioMinimo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaCreacion) {
+        return ResponseEntity.ok(productoStockService.obtenerProductosSinStockEnCarritosAbiertos(precioMinimo, fechaCreacion));
     }
 
     @Operation(

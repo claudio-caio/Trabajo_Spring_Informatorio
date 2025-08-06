@@ -23,7 +23,12 @@ public class ProductoStockServiceImpl implements ProductoStockService {
         // Si no se proporciona fecha, usar la fecha actual
         LocalDateTime fechaFiltro = fechaCreacion != null ? fechaCreacion : LocalDateTime.now();
 
-        List<Producto> productos = productoRepository.findProductosSinStockEnCarritosAbiertos(fechaFiltro);
+        List<Producto> productos;
+        try {
+            productos = productoRepository.findProductosSinStockEnCarritosAbiertos(fechaFiltro);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener productos sin stock en carritos abiertos", e);
+        }
 
         return productos.stream()
                 .filter(producto -> precioMinimo == null || BigDecimal.valueOf(producto.getPrecio()).compareTo(precioMinimo) >= 0)
